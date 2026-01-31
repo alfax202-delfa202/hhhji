@@ -1,0 +1,5 @@
+admin.txt
+setup.log
+install.log
+phpinfo.txt
+db.sql

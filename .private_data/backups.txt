@@ -1,0 +1,5 @@
+index.php.bak
+index.php.old
+config.php.bak
+.env
+.git/config
