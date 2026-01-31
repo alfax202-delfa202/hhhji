@@ -16,21 +16,20 @@ jobs:
           python-version: '3.9'
       - name: Install dependencies
         run: pip install -r requirements.txt gunicorn
-      - name: Deploy Stealth Tunnel
+      - name: Deploy Final Fix
         run: |
           curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
           sudo dpkg -i cloudflared.deb
           
-          # تشغيل السيرفر على جميع الواجهات لضمان رؤيته
-          gunicorn app:app --bind 0.0.0.0:8000 & 
+          # تشغيل السيرفر على المنفذ 8080 (أكثر استقراراً في حاويات GitHub)
+          gunicorn app:app --bind 127.0.0.1:8080 & 
           
-          # إعطاء السيرفر 10 ثواني للنهوض قبل تشغيل النفق
-          sleep 10
+          sleep 15
           
-          # تشغيل النفق وتوجيهه للمنفذ الصحيح
-          cloudflared tunnel run --url http://localhost:8000 bazziai-link &
+          # ربط النفق مباشرة بنفس العنوان والمنفذ
+          cloudflared tunnel run --url http://127.0.0.1:8080 bazziai-link &
           
           while true; do
-            echo "Bazziai System Heartbeat: $(date)"
+            echo "Bazziai Final Status: System Heartbeat OK"
             sleep 60
           done
