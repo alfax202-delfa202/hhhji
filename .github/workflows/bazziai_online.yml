@@ -3,7 +3,7 @@ on:
   push:
     branches: [ main ]
   schedule:
-    - cron: '0 */6 * * *' # يعيد التشغيل كل 6 ساعات لضمان الاستمرارية
+    - cron: '0 */6 * * *'
 jobs:
   run-site:
     runs-on: ubuntu-latest
@@ -15,5 +15,9 @@ jobs:
           python-version: '3.9'
       - name: Install dependencies
         run: pip install -r requirements.txt gunicorn
-      - name: Run Server
-        run: gunicorn app:app & sleep 21600 # يظل شغالاً لمدة 6 ساعات في كل دورة
+      - name: Download & Run Tunnel
+        run: |
+          curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
+          sudo dpkg -i cloudflared.deb
+          gunicorn app:app & 
+          cloudflared tunnel run --url http://127.0.0.1:8000 bazziai-link
