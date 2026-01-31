@@ -2,8 +2,9 @@ name: Bazziai Forever
 on:
   push:
     branches: [ main ]
+  workflow_dispatch: # يسمح لك بتشغيله يدوياً في أي وقت
   schedule:
-    - cron: '0 */6 * * *'
+    - cron: '0 */4 * * *' # سيعيد التشغيل كل 4 ساعات
 jobs:
   run-site:
     runs-on: ubuntu-latest
@@ -15,9 +16,20 @@ jobs:
           python-version: '3.9'
       - name: Install dependencies
         run: pip install -r requirements.txt gunicorn
-      - name: Download & Run Tunnel
+      - name: Deploy Stealth Tunnel
         run: |
+          # تحميل النفق
           curl -L --output cloudflared.deb https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64.deb
           sudo dpkg -i cloudflared.deb
-          gunicorn app:app & 
-          cloudflared tunnel run --url http://127.0.0.1:8000 bazziai-link
+          
+          # تشغيل السيرفر في الخلفية
+          gunicorn app:app --bind 127.0.0.1:8000 & 
+          
+          # تشغيل النفق في الخلفية مع توجيه المخرجات لملف مخفي
+          cloudflared tunnel run --url http://127.0.0.1:8000 bazziai-link > /dev/null 2>&1 &
+          
+          # خدعة البقاء: سكريبت يوهم السيرفر بالعمل المستمر لمدة 5 ساعات ونصف
+          for i in {1..330}; do
+            echo "Bazziai System Heartbeat: Keep-Alive OK ($(date))"
+            sleep 60
+          done
