@@ -1,0 +1,19 @@
+name: Bazziai Forever
+on:
+  push:
+    branches: [ main ]
+  schedule:
+    - cron: '0 */6 * * *' # يعيد التشغيل كل 6 ساعات لضمان الاستمرارية
+jobs:
+  run-site:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.9'
+      - name: Install dependencies
+        run: pip install -r requirements.txt gunicorn
+      - name: Run Server
+        run: gunicorn app:app & sleep 21600 # يظل شغالاً لمدة 6 ساعات في كل دورة
